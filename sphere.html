@@ -2459,23 +2459,12 @@
       // 停止上一关音乐
       GameAudio.stop(0.5);
 
-      // 异步加载并播放新关卡音乐（不阻塞游戏开始）
+      // 后台加载并播放新关卡音乐（完全不阻塞游戏）
       var levelData = LEVELS[levelIdx];
       if (levelData.music) {
-        // 显示一个小提示，2秒后自动消失
-        showLoading();
-        updateLoading(50);
         GameAudio.loadMusic(levelData.music).then(function(buf) {
-          if (buf) {
-            updateLoading(100);
-            GameAudio.play(0, 1.5);
-          }
-          hideLoading();
-        }).catch(function() {
-          hideLoading();
-        });
-        // 保底：最多5秒后一定关闭加载界面，即使音乐没加载完
-        setTimeout(function() { hideLoading(); }, 5000);
+          if (buf) { GameAudio.play(0, 1.5); }
+        }).catch(function() {});
       }
 
       // 重置球体
