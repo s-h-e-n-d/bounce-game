@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Three.js 3D 球体</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -3135,7 +3135,16 @@
     });
 
     // 触屏支持
+    addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        mouseXRaw = (e.touches[0].clientX / innerWidth) * 2 - 1;
+        ballXTarget = mouseXRaw * BALL_X_LIMIT;
+        mouseInited = true;
+      }
+    }, { passive: true });
+
     addEventListener('touchmove', (e) => {
+      e.preventDefault(); // 阻止页面滚动
       if (e.touches.length > 0) {
         mouseXRaw = (e.touches[0].clientX / innerWidth) * 2 - 1;
         if (!mouseInited) {
@@ -3143,7 +3152,7 @@
           mouseInited = true;
         }
       }
-    }, { passive: true });
+    }, { passive: false });
 
     // ── 交互（纯自动旋转，无鼠标操作） ───────────────────────
     let camDist = 10;
