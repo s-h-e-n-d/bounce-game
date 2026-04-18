@@ -1890,11 +1890,14 @@
         }
       },
 
-      // 异步加载并解码音乐文件，返回 AudioBuffer
+      // 异步加载并解码音乐文件，返回 AudioBuffer（带超时）
       async loadMusic(url) {
         this._ensureCtx();
         try {
-          const resp = await fetch(url);
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 15000); // 15秒超时
+          const resp = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeout);
           if (!resp.ok) throw new Error('HTTP ' + resp.status);
           const arrayBuf = await resp.arrayBuffer();
           this.buffer = await this.ctx.decodeAudioData(arrayBuf);
@@ -2456,20 +2459,24 @@
       // 停止上一关音乐
       GameAudio.stop(0.5);
 
-      // 异步加载并播放新关卡音乐
+      // 异步加载并播放新关卡音乐（不阻塞游戏开始）
       var levelData = LEVELS[levelIdx];
       if (levelData.music) {
+        // 显示一个小提示，2秒后自动消失
         showLoading();
-        updateLoading(30);
+        updateLoading(50);
         GameAudio.loadMusic(levelData.music).then(function(buf) {
-          updateLoading(80);
           if (buf) {
+            updateLoading(100);
             GameAudio.play(0, 1.5);
           }
           hideLoading();
         }).catch(function() {
           hideLoading();
         });
+        // 保底：最多5秒后一定关闭加载界面，即使音乐没加载完
+        setTimeout(function() { hideLoading(); }, 5000);
+      }
       }
 
       // 重置球体
